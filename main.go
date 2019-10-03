@@ -127,11 +127,29 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	read_pixels(r)
-	err = r.Copy(pixelTex, nil, nil)
-	if err != nil {
-		panic(err)
+
+	x := int32(0)
+	for i := 0; i < len(sprites); i++ {
+
+		sprite := sprites[i]
+
+		tgtRect := sdl.Rect{
+			X: x,
+			Y: 0,
+			W: sprite.Rect.W,
+			H: sprite.Rect.H,
+		}
+
+		x = x + sprite.Rect.X
+
+		err = r.Copy(pixelTex, &sprite.Rect, &tgtRect)
+		if err != nil {
+			panic(err)
+		}
 	}
+
 	r.Present()
 
 	/*
