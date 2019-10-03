@@ -2,10 +2,12 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"os"
 	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
@@ -96,6 +98,9 @@ func read_tiles() {
 
 	}
 
+	fmt.Printf("%v\n", sprites[0])
+	fmt.Printf("%v\n", sprites[1])
+	fmt.Printf("%v\n", sprites[2])
 }
 
 var pixelTex *sdl.Texture
@@ -128,44 +133,55 @@ func main() {
 		panic(err)
 	}
 
+	r.SetScale(4.0, 4.0)
+
 	read_pixels(r)
 
-	x := int32(0)
-	for i := 0; i < len(sprites); i++ {
-
-		sprite := sprites[i]
-
-		tgtRect := sdl.Rect{
-			X: x,
-			Y: 0,
-			W: sprite.Rect.W,
-			H: sprite.Rect.H,
-		}
-
-		x = x + sprite.Rect.X
-
-		err = r.Copy(pixelTex, &sprite.Rect, &tgtRect)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	r.Present()
-
-	/*
-		surface, err := window.GetSurface()
-		if err != nil {
-			panic(err)
-		}
-		surface.FillRect(nil, 0)
-
-		rect := sdl.Rect{0, 0, 200, 200}
-		surface.FillRect(&rect, 0xffff0000)
-		window.UpdateSurface()
-	*/
-
 	running := true
+	tick := 0
 	for running {
+
+		x := int32(0)
+		y := int32(0)
+		for i := 0; i < len(sprites); i++ {
+
+			sprite := sprites[i]
+
+			tgtRect := sdl.Rect{
+				X: x,
+				Y: y,
+				W: sprite.Rect.W,
+				H: sprite.Rect.H,
+			}
+
+			x = x + sprite.Rect.W
+
+			if x > 200 {
+				x = 0
+				y = y + 32
+			}
+
+			// fmt.Printf("copying from %v to %v\n", sprite.Rect, tgtRect)
+			err = r.Copy(pixelTex, &sprite.Rect, &tgtRect)
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		r.Present()
+
+		/*
+			surface, err := window.GetSurface()
+			if err != nil {
+				panic(err)
+			}
+			surface.FillRect(nil, 0)
+
+			rect := sdl.Rect{0, 0, 200, 200}
+			surface.FillRect(&rect, 0xffff0000)
+			window.UpdateSurface()
+		*/
+
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch event.(type) {
 			case *sdl.QuitEvent:
@@ -174,5 +190,8 @@ func main() {
 				break
 			}
 		}
+
+		time.Sleep(time.Seconds / 30)
+		tick = tick + 1
 	}
 }
