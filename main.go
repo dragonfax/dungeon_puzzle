@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"io"
 	"os"
 	"regexp"
 	"strconv"
@@ -11,15 +12,15 @@ import (
 )
 
 type Frame struct {
-	X, Y, W, H int
+	sdl.Rect
 	// PixelData
 }
 
 type Sprite struct {
-	X, Y, W, H int
 	FrameCount int
 	Frames     []Frame
 	Name       string
+	Rect       sdl.Rect
 }
 
 var sprites []Sprite
@@ -27,7 +28,7 @@ var sprites []Sprite
 func read_tiles() {
 	sprites = make([]Sprite, 0)
 
-	parseLine := regexp.MustCompile(`^([a-z_]+) (\d+) (\d+) (\d+) (\d+)( (\d+))?$`)
+	parseLine := regexp.MustCompile(`^([0-9a-z_]+)\s+(\d+) (\d+) (\d+) (\d+)( (\d+))?$`)
 
 	file, err := os.Open("sprites/tiles_list_v1")
 	defer file.Close()
@@ -35,17 +36,25 @@ func read_tiles() {
 	rd := bufio.NewReader(file)
 
 	for err == nil {
-		line, isPrefix, err := rd.ReadLine()
+		lineBytes, isPrefix, err := rd.ReadLine()
 		if isPrefix {
 			panic(err)
+		}
+		if err == io.EOF {
+			break
 		}
 		if err != nil {
 			panic(err)
 		}
 
-		matches := parseLine.FindStringSubmatch(string(line))
-		if len(matches) == 0 {
+		line := string(lineBytes)
+		if line == "" {
 			continue
+		}
+
+		matches := parseLine.FindStringSubmatch(line)
+		if len(matches) == 0 {
+			panic("didn't match " + line)
 		}
 		name := matches[1]
 		x, err := strconv.Atoi(matches[2])
@@ -58,13 +67,30 @@ func read_tiles() {
 		}
 
 		sprite := Sprite{
-			Name:       name,
-			X:          x,
-			Y:          y,
-			W:          w,
-			H:          h,
+			Name: name,
+			Rect: sdl.Rect{
+				X: int32(x),
+				Y: int32(y),
+				W: int32(w),
+				H: int32(h),
+			},
 			FrameCount: frames,
 		}
+
+		frameList := make([]Frame, 0)
+		for x := 0; x < sprite.FrameCount; x++ {
+
+			frameList = append(frameList, Frame{
+				sdl.Rect{
+					X: sprite.Rect.X + int32(x)*sprite.Rect.W,
+					Y: sprite.Rect.Y,
+					W: sprite.Rect.W,
+					H: sprite.Rect.H,
+				},
+			})
+		}
+
+		sprite.Frames = frameList
 
 		sprites = append(sprites, sprite)
 
@@ -83,6 +109,8 @@ func read_pixels(r *sdl.Renderer) {
 }
 
 func main() {
+	read_tiles()
+
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		panic(err)
 	}
