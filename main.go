@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"os"
 	"regexp"
@@ -64,8 +63,11 @@ func read_tiles() {
 		w, err := strconv.Atoi(matches[4])
 		h, err := strconv.Atoi(matches[5])
 		frames := 1
-		if len(matches) == 7 {
-			frames, err = strconv.Atoi(matches[6])
+		if matches[7] != "" {
+			frames, err = strconv.Atoi(matches[7])
+			if err != nil {
+				panic(err)
+			}
 		}
 
 		sprite := Sprite{
@@ -98,9 +100,6 @@ func read_tiles() {
 
 	}
 
-	fmt.Printf("%v\n", sprites[0])
-	fmt.Printf("%v\n", sprites[1])
-	fmt.Printf("%v\n", sprites[2])
 }
 
 var pixelTex *sdl.Texture
@@ -141,28 +140,36 @@ func main() {
 	tick := 0
 	for running {
 
+		r.Clear()
+
 		x := int32(0)
 		y := int32(0)
 		for i := 0; i < len(sprites); i++ {
 
 			sprite := sprites[i]
 
+			animIndex := tick % sprite.FrameCount
+			if sprite.FrameCount == 1 {
+				animIndex = 0
+			}
+
+			frame := sprite.Frames[animIndex]
+
 			tgtRect := sdl.Rect{
 				X: x,
 				Y: y,
-				W: sprite.Rect.W,
-				H: sprite.Rect.H,
+				W: frame.Rect.W,
+				H: frame.Rect.H,
 			}
 
-			x = x + sprite.Rect.W
+			x = x + frame.Rect.W
 
 			if x > 200 {
 				x = 0
-				y = y + 32
+				y = y + 16
 			}
 
-			// fmt.Printf("copying from %v to %v\n", sprite.Rect, tgtRect)
-			err = r.Copy(pixelTex, &sprite.Rect, &tgtRect)
+			err = r.Copy(pixelTex, &frame.Rect, &tgtRect)
 			if err != nil {
 				panic(err)
 			}
@@ -185,13 +192,12 @@ func main() {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch event.(type) {
 			case *sdl.QuitEvent:
-				println("Quit")
 				running = false
 				break
 			}
 		}
 
-		time.Sleep(time.Seconds / 30)
+		time.Sleep(time.Second / 30)
 		tick = tick + 1
 	}
 }
