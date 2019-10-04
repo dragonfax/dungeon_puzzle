@@ -3,10 +3,13 @@ package main
 import (
 	"bufio"
 	"flag"
+	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/veandco/go-sdl2/img"
@@ -23,9 +26,38 @@ type Sprite struct {
 	Frames     []Frame
 	Name       string
 	Rect       sdl.Rect
+	Tags       []string
 }
 
 var sprites []Sprite
+
+func includesTag(tags []string, tag string) bool {
+	for _, t := range tags {
+		if t == tag {
+			return true
+		}
+	}
+	return false
+}
+
+func spritesWithTag(tag string) []*Sprite {
+	tagged := make([]*Sprite, 0)
+	for i := range sprites {
+		sprite := &sprites[i]
+		if includesTag(sprite.Tags, tag) {
+			fmt.Printf("tags %v includes tag %s\n", sprite.Tags, tag)
+			tagged = append(tagged, sprite)
+		}
+	}
+	if len(tagged) == 0 {
+		panic("no sprite with tag " + tag)
+	}
+	return tagged
+}
+
+func spriteWithTag(tag string) *Sprite {
+	return spritesWithTag(tag)[0]
+}
 
 func read_tiles() {
 	sprites = make([]Sprite, 0)
@@ -71,6 +103,9 @@ func read_tiles() {
 			}
 		}
 
+		tags := strings.Split(name, "_")
+		// fmt.Printf("sprite has tags %v\n", tags)
+
 		sprite := Sprite{
 			Name: name,
 			Rect: sdl.Rect{
@@ -80,6 +115,7 @@ func read_tiles() {
 				H: int32(h),
 			},
 			FrameCount: frames,
+			Tags:       tags,
 		}
 
 		frameList := make([]Frame, 0)
@@ -104,12 +140,46 @@ func read_tiles() {
 }
 
 var pixelTex *sdl.Texture
+var reticleTex *sdl.Texture
+
+func read_reticle(r *sdl.Renderer) {
+	var err error
+	reticleTex, err = img.LoadTexture(r, "sprites/reticle.png")
+	if err != nil {
+		panic(err)
+	}
+}
 
 func read_pixels(r *sdl.Renderer) {
 	var err error
 	pixelTex, err = img.LoadTexture(r, "sprites/0x72_DungeonTilesetII_v1.png")
 	if err != nil {
 		panic(err)
+	}
+}
+
+func showFloor(tick int, r *sdl.Renderer, floor [][]*Sprite) {
+	for y := 0; y < len(floor); y++ {
+		for x := 0; x < len(floor[y]); x++ {
+			sprite := floor[y][x]
+			// fmt.Printf("drawing floor tile %s\n", sprite.Name)
+			animIndex := tick % sprite.FrameCount
+			if sprite.FrameCount == 1 {
+				animIndex = 0
+			}
+			frame := sprite.Frames[animIndex]
+
+			tgtRect := sdl.Rect{
+				X: int32(x) * 16,
+				Y: int32(y) * 16,
+				W: sprite.Rect.W,
+				H: sprite.Rect.H,
+			}
+			err := r.Copy(pixelTex, &frame.Rect, &tgtRect)
+			if err != nil {
+				panic(err)
+			}
+		}
 	}
 }
 
@@ -126,7 +196,6 @@ func showSpriteMap(tick int, r *sdl.Renderer) {
 		if sprite.FrameCount == 1 {
 			animIndex = 0
 		}
-
 		frame := sprite.Frames[animIndex]
 
 		tgtRect := sdl.Rect{
@@ -148,6 +217,30 @@ func showSpriteMap(tick int, r *sdl.Renderer) {
 			panic(err)
 		}
 	}
+}
+
+var floorTiles []*Sprite
+
+func chooseRandomFloorSprite() *Sprite {
+	if floorTiles == nil {
+		floorTiles = spritesWithTag("floor")
+		fmt.Printf("found %d floor tiles\n", len(floorTiles))
+		fmt.Printf("%v\n%v\n", floorTiles[0], floorTiles[1])
+	}
+	n := rand.Intn(len(floorTiles))
+	// fmt.Printf("choosing floor tile %d %s\n", n, floorTiles[n].Name)
+	return floorTiles[n]
+}
+
+func generateFloor() [][]*Sprite {
+	floor := make([][]*Sprite, 10)
+	for y := 0; y < 10; y++ {
+		floor[y] = make([]*Sprite, 10)
+		for x := 0; x < 10; x++ {
+			floor[y][x] = chooseRandomFloorSprite()
+		}
+	}
+	return floor
 }
 
 func main() {
@@ -177,6 +270,9 @@ func main() {
 	r.SetScale(4.0, 4.0)
 
 	read_pixels(r)
+	read_reticle(r)
+
+	var floor [][]*Sprite
 
 	running := true
 	tick := 0
@@ -186,6 +282,11 @@ func main() {
 
 		if *spriteMap {
 			showSpriteMap(tick, r)
+		} else {
+			if floor == nil {
+				floor = generateFloor()
+			}
+			showFloor(tick, r, floor)
 		}
 
 		r.Present()
