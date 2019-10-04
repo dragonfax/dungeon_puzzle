@@ -187,6 +187,12 @@ func showFloor(tick int, r *sdl.Renderer, floor [][]*Sprite) {
 	}
 }
 
+func drawEntities(tick int, r *sdl.Renderer, entities []*PlacedEntity) {
+	for _, entity := range entities {
+		drawSpriteAt(tick, r, entity.Sprite, entity.X*16, entity.Y*16)
+	}
+}
+
 func drawSpriteAt(tick int, r *sdl.Renderer, sprite *Sprite, x, y int32) {
 	animIndex := tick % sprite.FrameCount
 	if sprite.FrameCount == 1 {
@@ -249,12 +255,37 @@ func generateFloor() [][]*Sprite {
 	return floor
 }
 
+func gatherWeapons() []*Sprite {
+	return spritesWithTag("weapon")
+}
+
+type PlacedEntity struct {
+	Sprite *Sprite
+	X, Y   int32
+}
+
+func placeWeapons(weapons []*Sprite) []*PlacedEntity {
+	placedWeapons := make([]*PlacedEntity, 0)
+	for i := range weapons {
+		weapon := weapons[i]
+		placedWeapon := &PlacedEntity{
+			Sprite: weapon,
+			X:      rand.Int31n(16),
+			Y:      rand.Int31n(16),
+		}
+		placedWeapons = append(placedWeapons, placedWeapon)
+	}
+	return placedWeapons
+}
+
 func main() {
 
 	spriteMap := flag.Bool("sprite-map", false, "show the sprites")
 	flag.Parse()
 
 	read_tiles()
+	weapons := gatherWeapons()
+	placedWeapons := placeWeapons(weapons)
 
 	character := spriteByName("wizzard_m_idle_anim")
 	characterHit := spriteByName("wizzart_m_hit_anim")
@@ -303,6 +334,8 @@ func main() {
 			showFloor(tick, r, floor)
 
 			drawHorde(tick, r)
+
+			drawEntities(tick, r, placedWeapons)
 
 			// draw player
 			if attackTimer > 0 {
