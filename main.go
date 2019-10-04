@@ -19,7 +19,7 @@ import (
 )
 
 const UNIT_SIZE = 16
-const FIELD_WIDTH = 16
+const FIELD_WIDTH = 16 * UNIT_SIZE
 
 type Sprite struct {
 	FrameCount int
@@ -181,7 +181,7 @@ func showFloor(tick int, r *sdl.Renderer, floor [][]*Sprite) {
 
 func drawEntities(tick int, r *sdl.Renderer, entities []*PlacedEntity) {
 	for _, entity := range entities {
-		drawSpriteAt(tick, r, entity.Sprite, entity.Shape.X*UNIT_SIZE, entity.Shape.Y*UNIT_SIZE)
+		drawSpriteAt(tick, r, entity.Sprite, entity.Shape.X, entity.Shape.Y)
 	}
 }
 
@@ -264,7 +264,7 @@ func placeWeapons(weapons []*Sprite) ([]*PlacedEntity, *resolv.Space) {
 		weapon := weapons[i]
 		placedWeapon := &PlacedEntity{
 			Sprite: weapon,
-			Shape:  resolv.NewRectangle(rand.Int31n(FIELD_WIDTH), rand.Int31n(FIELD_WIDTH), weapon.Frames[0].W, weapon.Frames[0].H),
+			Shape:  resolv.NewRectangle(rand.Int31n(FIELD_WIDTH/UNIT_SIZE)*UNIT_SIZE, rand.Int31n(FIELD_WIDTH/UNIT_SIZE)*UNIT_SIZE, weapon.Frames[0].W, weapon.Frames[0].H),
 		}
 		placedWeapon.Shape.SetData(placedWeapon)
 		space.Add(placedWeapon.Shape)
@@ -295,7 +295,7 @@ func main() {
 	character := spriteByName("wizzard_m_idle_anim")
 	characterHit := spriteByName("wizzart_m_hit_anim")
 	attackTimer := 0
-	characterShape := resolv.NewRectangle(4, 4, character.Frames[0].W, character.Frames[0].H)
+	characterShape := resolv.NewRectangle(4*UNIT_SIZE, 4*UNIT_SIZE, character.Frames[0].W, character.Frames[0].H)
 	var weilded *Sprite
 
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
@@ -356,7 +356,7 @@ func main() {
 			}
 
 			if weilded != nil {
-				drawSpriteAt(tick, r, weilded, (characterShape.X+1)*UNIT_SIZE, (characterShape.Y-1)*UNIT_SIZE)
+				drawSpriteAt(tick, r, weilded, characterShape.X+UNIT_SIZE, characterShape.Y-UNIT_SIZE)
 			}
 
 			drawEntities(tick, r, placedWeapons)
@@ -364,9 +364,9 @@ func main() {
 			// draw player
 			if attackTimer > 0 {
 				attackTimer--
-				drawSpriteAt(tick, r, characterHit, characterShape.X*UNIT_SIZE, characterShape.Y*UNIT_SIZE)
+				drawSpriteAt(tick, r, characterHit, characterShape.X, characterShape.Y)
 			} else {
-				drawSpriteAt(tick, r, character, characterShape.X*UNIT_SIZE, characterShape.Y*UNIT_SIZE)
+				drawSpriteAt(tick, r, character, characterShape.X, characterShape.Y)
 			}
 
 		}
@@ -390,24 +390,24 @@ func main() {
 				if e.Type == sdl.KEYDOWN {
 					switch e.Keysym.Sym {
 					case sdl.K_LEFT, sdl.K_a:
-						characterShape.X = characterShape.X - 1
+						characterShape.X = characterShape.X - UNIT_SIZE
 						if characterShape.X < 0 {
 							characterShape.X = 0
 						}
 					case sdl.K_RIGHT, sdl.K_d:
-						characterShape.X = characterShape.X + 1
+						characterShape.X = characterShape.X + UNIT_SIZE
 						if characterShape.X >= FIELD_WIDTH {
-							characterShape.X = FIELD_WIDTH - 1
+							characterShape.X = FIELD_WIDTH - UNIT_SIZE
 						}
 					case sdl.K_UP, sdl.K_w:
-						characterShape.Y = characterShape.Y - 1
+						characterShape.Y = characterShape.Y - UNIT_SIZE
 						if characterShape.Y < 0 {
 							characterShape.Y = 0
 						}
 					case sdl.K_DOWN, sdl.K_s:
-						characterShape.Y = characterShape.Y + 1
+						characterShape.Y = characterShape.Y + UNIT_SIZE
 						if characterShape.Y >= FIELD_WIDTH {
-							characterShape.Y = FIELD_WIDTH - 1
+							characterShape.Y = FIELD_WIDTH - UNIT_SIZE
 						}
 					case sdl.K_SPACE:
 						// attack
