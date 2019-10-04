@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -140,14 +141,14 @@ func read_tiles() {
 }
 
 var pixelTex *sdl.Texture
-var reticleTex *sdl.Texture
+var reticleSur *sdl.Surface
 
 func read_reticle(r *sdl.Renderer) {
-	var err error
-	reticleTex, err = img.LoadTexture(r, "sprites/reticle.png")
+	sur, err := img.Load("sprites/reticle.png")
 	if err != nil {
 		panic(err)
 	}
+	reticleSur = gfx.ZoomSurface(sur, 8, 8, 0)
 }
 
 func read_pixels(r *sdl.Renderer) {
@@ -271,6 +272,9 @@ func main() {
 
 	read_pixels(r)
 	read_reticle(r)
+
+	cursor := sdl.CreateColorCursor(reticleSur, 4, 4)
+	sdl.SetCursor(cursor)
 
 	var floor [][]*Sprite
 
