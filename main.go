@@ -331,31 +331,28 @@ func main() {
 			switch e := event.(type) {
 			case *sdl.KeyboardEvent:
 				if e.Type == sdl.KEYDOWN {
-					if e.Keysym.Sym == sdl.K_LEFT {
+					switch e.Keysym.Sym {
+					case sdl.K_LEFT, sdl.K_a:
 						charX = charX - 1
 						if charX < 0 {
 							charX = 0
 						}
-					}
-					if e.Keysym.Sym == sdl.K_RIGHT {
+					case sdl.K_RIGHT, sdl.K_d:
 						charX = charX + 1
 						if charX > 15 {
 							charX = 15
 						}
-					}
-					if e.Keysym.Sym == sdl.K_UP {
+					case sdl.K_UP, sdl.K_w:
 						charY = charY - 1
 						if charY < 0 {
 							charY = 0
 						}
-					}
-					if e.Keysym.Sym == sdl.K_DOWN {
+					case sdl.K_DOWN, sdl.K_s:
 						charY = charY + 1
 						if charY > 15 {
 							charY = 15
 						}
-					}
-					if e.Keysym.Sym == sdl.K_SPACE {
+					case sdl.K_SPACE:
 						// attack
 						attackTimer = 3
 					}
