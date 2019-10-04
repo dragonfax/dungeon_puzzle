@@ -12,10 +12,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/SolarLune/resolv/resolv"
 	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 )
+
+const UNIT_SIZE = 16
+const FIELD_WIDTH = 16
 
 type Sprite struct {
 	FrameCount int
@@ -160,7 +164,7 @@ func drawHorde(tick int, r *sdl.Renderer) {
 	sprite := spriteByName("goblin_idle_anim")
 	for y := 0; y < 2; y++ {
 		for x := 0; x < 4; x++ {
-			drawSpriteAt(tick, r, sprite, int32(x)*16+4*16, int32(y)*16+2*16)
+			drawSpriteAt(tick, r, sprite, int32(x+4)*UNIT_SIZE, int32(y+2)*UNIT_SIZE)
 		}
 	}
 }
@@ -170,14 +174,14 @@ func showFloor(tick int, r *sdl.Renderer, floor [][]*Sprite) {
 		for x := 0; x < len(floor[y]); x++ {
 			sprite := floor[y][x]
 
-			drawSpriteAt(tick, r, sprite, int32(x)*16, int32(y)*16)
+			drawSpriteAt(tick, r, sprite, int32(x)*UNIT_SIZE, int32(y)*UNIT_SIZE)
 		}
 	}
 }
 
 func drawEntities(tick int, r *sdl.Renderer, entities []*PlacedEntity) {
 	for _, entity := range entities {
-		drawSpriteAt(tick, r, entity.Sprite, entity.X*16, entity.Y*16)
+		drawSpriteAt(tick, r, entity.Sprite, entity.Shape.X*UNIT_SIZE, entity.Shape.Y*UNIT_SIZE)
 	}
 }
 
@@ -213,7 +217,7 @@ func showSpriteMap(tick int, r *sdl.Renderer) {
 
 		if x > 200 {
 			x = 0
-			y = y + 16
+			y = y + UNIT_SIZE
 		}
 
 	}
@@ -249,21 +253,34 @@ func gatherWeapons() []*Sprite {
 
 type PlacedEntity struct {
 	Sprite *Sprite
-	X, Y   int32
+	Shape  *resolv.Rectangle
 }
 
-func placeWeapons(weapons []*Sprite) []*PlacedEntity {
+func placeWeapons(weapons []*Sprite) ([]*PlacedEntity, *resolv.Space) {
+	space := resolv.NewSpace()
+
 	placedWeapons := make([]*PlacedEntity, 0)
 	for i := range weapons {
 		weapon := weapons[i]
 		placedWeapon := &PlacedEntity{
 			Sprite: weapon,
-			X:      rand.Int31n(16),
-			Y:      rand.Int31n(16),
+			Shape:  resolv.NewRectangle(rand.Int31n(FIELD_WIDTH), rand.Int31n(FIELD_WIDTH), weapon.Frames[0].W, weapon.Frames[0].H),
 		}
+		placedWeapon.Shape.SetData(placedWeapon)
+		space.Add(placedWeapon.Shape)
 		placedWeapons = append(placedWeapons, placedWeapon)
 	}
-	return placedWeapons
+	return placedWeapons, space
+}
+
+func removePlacedEntity(input []*PlacedEntity, entity *PlacedEntity) []*PlacedEntity {
+	for i, e := range input {
+		if e == entity {
+			// delete the item
+			return append(input[:i], input[i+1:]...)
+		}
+	}
+	panic("can't remove entity")
 }
 
 func main() {
@@ -273,13 +290,13 @@ func main() {
 
 	read_tiles()
 	weapons := gatherWeapons()
-	placedWeapons := placeWeapons(weapons)
+	placedWeapons, weaponSpace := placeWeapons(weapons)
 
 	character := spriteByName("wizzard_m_idle_anim")
 	characterHit := spriteByName("wizzart_m_hit_anim")
-	var charX int32 = 4
-	var charY int32 = 4
 	attackTimer := 0
+	characterShape := resolv.NewRectangle(4, 4, character.Frames[0].W, character.Frames[0].H)
+	var weilded *Sprite
 
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		panic(err)
@@ -323,14 +340,33 @@ func main() {
 
 			drawHorde(tick, r)
 
+			weaponsColliding := weaponSpace.GetCollidingShapes(characterShape)
+			if weaponsColliding.Length() > 0 {
+				fmt.Printf("%d weapons colliding\n", weaponsColliding.Length())
+				// take the weapon off the field.
+				collidingWeapon := weaponsColliding.Get(0)
+				weaponSpace.Remove(collidingWeapon)
+				weapon, ok := collidingWeapon.GetData().(*PlacedEntity)
+				if !ok {
+					panic(fmt.Sprintf("wasm't a weapon (*PlacedEntity) was %T ", collidingWeapon.GetData()))
+				}
+				placedWeapons = removePlacedEntity(placedWeapons, weapon)
+				// give the weapon to the player.j
+				weilded = weapon.Sprite
+			}
+
+			if weilded != nil {
+				drawSpriteAt(tick, r, weilded, (characterShape.X+1)*UNIT_SIZE, (characterShape.Y-1)*UNIT_SIZE)
+			}
+
 			drawEntities(tick, r, placedWeapons)
 
 			// draw player
 			if attackTimer > 0 {
 				attackTimer--
-				drawSpriteAt(tick, r, characterHit, charX*16, charY*16)
+				drawSpriteAt(tick, r, characterHit, characterShape.X*UNIT_SIZE, characterShape.Y*UNIT_SIZE)
 			} else {
-				drawSpriteAt(tick, r, character, charX*16, charY*16)
+				drawSpriteAt(tick, r, character, characterShape.X*UNIT_SIZE, characterShape.Y*UNIT_SIZE)
 			}
 
 		}
@@ -354,24 +390,24 @@ func main() {
 				if e.Type == sdl.KEYDOWN {
 					switch e.Keysym.Sym {
 					case sdl.K_LEFT, sdl.K_a:
-						charX = charX - 1
-						if charX < 0 {
-							charX = 0
+						characterShape.X = characterShape.X - 1
+						if characterShape.X < 0 {
+							characterShape.X = 0
 						}
 					case sdl.K_RIGHT, sdl.K_d:
-						charX = charX + 1
-						if charX > 15 {
-							charX = 15
+						characterShape.X = characterShape.X + 1
+						if characterShape.X >= FIELD_WIDTH {
+							characterShape.X = FIELD_WIDTH - 1
 						}
 					case sdl.K_UP, sdl.K_w:
-						charY = charY - 1
-						if charY < 0 {
-							charY = 0
+						characterShape.Y = characterShape.Y - 1
+						if characterShape.Y < 0 {
+							characterShape.Y = 0
 						}
 					case sdl.K_DOWN, sdl.K_s:
-						charY = charY + 1
-						if charY > 15 {
-							charY = 15
+						characterShape.Y = characterShape.Y + 1
+						if characterShape.Y >= FIELD_WIDTH {
+							characterShape.Y = FIELD_WIDTH - 1
 						}
 					case sdl.K_SPACE:
 						// attack

@@ -1,2 +1,6 @@
+github.com/SolarLune/resolv v0.0.0-20190821203317-2f6176d8d107 h1:KoCYURMjGLT9kHA9pzFWMRqvpzGuR1Ws+tHyErI1qGs=
+github.com/SolarLune/resolv v0.0.0-20190821203317-2f6176d8d107/go.mod h1:Ov0hOC/Xa1bCjByZrz5muPSE8pNZQZioXYMXxgx+K80=
+github.com/gen2brain/raylib-go v0.0.0-20190922171746-4b4860959e4f h1:OT80YbR08FVyg4Pv5PtMOcQXT/77v25ZZ8HhBqRIwTQ=
+github.com/gen2brain/raylib-go v0.0.0-20190922171746-4b4860959e4f/go.mod h1:LUVRDQbnxUaOgzLzW5lMS+IcbqlXHIqIA9wq8wxzmcA=
 github.com/veandco/go-sdl2 v0.3.3 h1:4/TirgB2MQ7oww3pM3Yfgf1YbChMlAQAmiCPe5koK0I=
 github.com/veandco/go-sdl2 v0.3.3/go.mod h1:FB+kTpX9YTE+urhYiClnRzpOXbiWgaU3+5F2AB78DPg=
