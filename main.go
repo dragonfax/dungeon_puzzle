@@ -60,6 +60,15 @@ func spriteWithTag(tag string) *Sprite {
 	return spritesWithTag(tag)[0]
 }
 
+func spriteByName(name string) *Sprite {
+	for _, sprite := range sprites {
+		if sprite.Name == name {
+			return &sprite
+		}
+	}
+	panic("no sprite by name " + name)
+}
+
 func read_tiles() {
 	sprites = make([]Sprite, 0)
 
@@ -238,9 +247,11 @@ func main() {
 
 	read_tiles()
 
-	character := spriteWithTag("wizzard")
+	character := spriteByName("wizzard_m_idle_anim")
+	characterHit := spriteByName("wizzart_m_hit_anim")
 	var charX int32 = 4
 	var charY int32 = 4
+	attackTimer := 0
 
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		panic(err)
@@ -284,7 +295,13 @@ func main() {
 			showFloor(tick, r, floor)
 		}
 
-		drawSpriteAt(tick, r, character, charX*16, charY*16)
+		// draw player
+		if attackTimer > 0 {
+			attackTimer--
+			drawSpriteAt(tick, r, characterHit, charX*16, charY*16)
+		} else {
+			drawSpriteAt(tick, r, character, charX*16, charY*16)
+		}
 
 		r.Present()
 
@@ -327,6 +344,10 @@ func main() {
 						if charY > 15 {
 							charY = 15
 						}
+					}
+					if e.Keysym.Sym == sdl.K_SPACE {
+						// attack
+						attackTimer = 3
 					}
 
 				}
