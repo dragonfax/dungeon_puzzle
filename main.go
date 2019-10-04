@@ -163,60 +163,47 @@ func showFloor(tick int, r *sdl.Renderer, floor [][]*Sprite) {
 	for y := 0; y < len(floor); y++ {
 		for x := 0; x < len(floor[y]); x++ {
 			sprite := floor[y][x]
-			// fmt.Printf("drawing floor tile %s\n", sprite.Name)
-			animIndex := tick % sprite.FrameCount
-			if sprite.FrameCount == 1 {
-				animIndex = 0
-			}
-			frame := sprite.Frames[animIndex]
 
-			tgtRect := sdl.Rect{
-				X: int32(x) * 16,
-				Y: int32(y) * 16,
-				W: sprite.Rect.W,
-				H: sprite.Rect.H,
-			}
-			err := r.Copy(pixelTex, &frame.Rect, &tgtRect)
-			if err != nil {
-				panic(err)
-			}
+			drawSpriteAt(tick, r, sprite, int32(x)*16, int32(y)*16)
 		}
 	}
 }
 
-func showSpriteMap(tick int, r *sdl.Renderer) {
-	var err error
+func drawSpriteAt(tick int, r *sdl.Renderer, sprite *Sprite, x, y int32) {
+	animIndex := tick % sprite.FrameCount
+	if sprite.FrameCount == 1 {
+		animIndex = 0
+	}
+	frame := sprite.Frames[animIndex]
 
+	tgtRect := sdl.Rect{
+		X: x,
+		Y: y,
+		W: frame.Rect.W,
+		H: frame.Rect.H,
+	}
+
+	err := r.Copy(pixelTex, &frame.Rect, &tgtRect)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func showSpriteMap(tick int, r *sdl.Renderer) {
 	x := int32(0)
 	y := int32(0)
 	for i := 0; i < len(sprites); i++ {
 
-		sprite := sprites[i]
+		sprite := &sprites[i]
+		drawSpriteAt(tick, r, sprite, x, y)
 
-		animIndex := tick % sprite.FrameCount
-		if sprite.FrameCount == 1 {
-			animIndex = 0
-		}
-		frame := sprite.Frames[animIndex]
-
-		tgtRect := sdl.Rect{
-			X: x,
-			Y: y,
-			W: frame.Rect.W,
-			H: frame.Rect.H,
-		}
-
-		x = x + frame.Rect.W
+		x = x + sprite.Rect.W
 
 		if x > 200 {
 			x = 0
 			y = y + 16
 		}
 
-		err = r.Copy(pixelTex, &frame.Rect, &tgtRect)
-		if err != nil {
-			panic(err)
-		}
 	}
 }
 
@@ -250,6 +237,10 @@ func main() {
 	flag.Parse()
 
 	read_tiles()
+
+	character := spriteWithTag("wizzard")
+	var charX int32 = 4
+	var charY int32 = 4
 
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		panic(err)
@@ -293,6 +284,8 @@ func main() {
 			showFloor(tick, r, floor)
 		}
 
+		drawSpriteAt(tick, r, character, charX*16, charY*16)
+
 		r.Present()
 
 		/*
@@ -308,7 +301,35 @@ func main() {
 		*/
 
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-			switch event.(type) {
+			switch e := event.(type) {
+			case *sdl.KeyboardEvent:
+				if e.Type == sdl.KEYDOWN {
+					if e.Keysym.Sym == sdl.K_LEFT {
+						charX = charX - 1
+						if charX < 0 {
+							charX = 0
+						}
+					}
+					if e.Keysym.Sym == sdl.K_RIGHT {
+						charX = charX + 1
+						if charX > 15 {
+							charX = 15
+						}
+					}
+					if e.Keysym.Sym == sdl.K_UP {
+						charY = charY - 1
+						if charY < 0 {
+							charY = 0
+						}
+					}
+					if e.Keysym.Sym == sdl.K_DOWN {
+						charY = charY + 1
+						if charY > 15 {
+							charY = 15
+						}
+					}
+
+				}
 			case *sdl.QuitEvent:
 				running = false
 				break
