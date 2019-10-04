@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"io"
 	"os"
 	"regexp"
@@ -112,7 +113,48 @@ func read_pixels(r *sdl.Renderer) {
 	}
 }
 
+func showSpriteMap(tick int, r *sdl.Renderer) {
+	var err error
+
+	x := int32(0)
+	y := int32(0)
+	for i := 0; i < len(sprites); i++ {
+
+		sprite := sprites[i]
+
+		animIndex := tick % sprite.FrameCount
+		if sprite.FrameCount == 1 {
+			animIndex = 0
+		}
+
+		frame := sprite.Frames[animIndex]
+
+		tgtRect := sdl.Rect{
+			X: x,
+			Y: y,
+			W: frame.Rect.W,
+			H: frame.Rect.H,
+		}
+
+		x = x + frame.Rect.W
+
+		if x > 200 {
+			x = 0
+			y = y + 16
+		}
+
+		err = r.Copy(pixelTex, &frame.Rect, &tgtRect)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
 func main() {
+
+	spriteMap := flag.Bool("sprite-map", false, "show the sprites")
+	flag.Parse()
+
 	read_tiles()
 
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
@@ -142,37 +184,8 @@ func main() {
 
 		r.Clear()
 
-		x := int32(0)
-		y := int32(0)
-		for i := 0; i < len(sprites); i++ {
-
-			sprite := sprites[i]
-
-			animIndex := tick % sprite.FrameCount
-			if sprite.FrameCount == 1 {
-				animIndex = 0
-			}
-
-			frame := sprite.Frames[animIndex]
-
-			tgtRect := sdl.Rect{
-				X: x,
-				Y: y,
-				W: frame.Rect.W,
-				H: frame.Rect.H,
-			}
-
-			x = x + frame.Rect.W
-
-			if x > 200 {
-				x = 0
-				y = y + 16
-			}
-
-			err = r.Copy(pixelTex, &frame.Rect, &tgtRect)
-			if err != nil {
-				panic(err)
-			}
+		if *spriteMap {
+			showSpriteMap(tick, r)
 		}
 
 		r.Present()
