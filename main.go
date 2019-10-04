@@ -17,16 +17,10 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-type Frame struct {
-	sdl.Rect
-	// PixelData
-}
-
 type Sprite struct {
 	FrameCount int
-	Frames     []Frame
+	Frames     []sdl.Rect
 	Name       string
-	Rect       sdl.Rect
 	Tags       []string
 }
 
@@ -117,28 +111,22 @@ func read_tiles() {
 		// fmt.Printf("sprite has tags %v\n", tags)
 
 		sprite := Sprite{
-			Name: name,
-			Rect: sdl.Rect{
-				X: int32(x),
-				Y: int32(y),
-				W: int32(w),
-				H: int32(h),
-			},
+			Name:       name,
 			FrameCount: frames,
 			Tags:       tags,
 		}
 
-		frameList := make([]Frame, 0)
-		for x := 0; x < sprite.FrameCount; x++ {
+		frameList := make([]sdl.Rect, 0)
+		for x1 := 0; x1 < sprite.FrameCount; x1++ {
 
-			frameList = append(frameList, Frame{
+			frameList = append(frameList,
 				sdl.Rect{
-					X: sprite.Rect.X + int32(x)*sprite.Rect.W,
-					Y: sprite.Rect.Y,
-					W: sprite.Rect.W,
-					H: sprite.Rect.H,
+					X: int32(x + x1*w),
+					Y: int32(y),
+					W: int32(w),
+					H: int32(h),
 				},
-			})
+			)
 		}
 
 		sprite.Frames = frameList
@@ -203,11 +191,11 @@ func drawSpriteAt(tick int, r *sdl.Renderer, sprite *Sprite, x, y int32) {
 	tgtRect := sdl.Rect{
 		X: x,
 		Y: y,
-		W: frame.Rect.W,
-		H: frame.Rect.H,
+		W: frame.W,
+		H: frame.H,
 	}
 
-	err := r.Copy(pixelTex, &frame.Rect, &tgtRect)
+	err := r.Copy(pixelTex, &frame, &tgtRect)
 	if err != nil {
 		panic(err)
 	}
@@ -221,7 +209,7 @@ func showSpriteMap(tick int, r *sdl.Renderer) {
 		sprite := &sprites[i]
 		drawSpriteAt(tick, r, sprite, x, y)
 
-		x = x + sprite.Rect.W
+		x = x + sprite.Frames[0].W
 
 		if x > 200 {
 			x = 0
