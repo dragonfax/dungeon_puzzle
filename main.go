@@ -168,6 +168,15 @@ func read_pixels(r *sdl.Renderer) {
 	}
 }
 
+func drawHorde(tick int, r *sdl.Renderer) {
+	sprite := spriteByName("goblin_idle_anim")
+	for y := 0; y < 2; y++ {
+		for x := 0; x < 4; x++ {
+			drawSpriteAt(tick, r, sprite, int32(x)*16+4*16, int32(y)*16+2*16)
+		}
+	}
+}
+
 func showFloor(tick int, r *sdl.Renderer, floor [][]*Sprite) {
 	for y := 0; y < len(floor); y++ {
 		for x := 0; x < len(floor[y]); x++ {
@@ -285,7 +294,6 @@ func main() {
 	for running {
 
 		r.Clear()
-
 		if *spriteMap {
 			showSpriteMap(tick, r)
 		} else {
@@ -293,16 +301,18 @@ func main() {
 				floor = generateFloor()
 			}
 			showFloor(tick, r, floor)
-		}
 
-		// draw player
-		if attackTimer > 0 {
-			attackTimer--
-			drawSpriteAt(tick, r, characterHit, charX*16, charY*16)
-		} else {
-			drawSpriteAt(tick, r, character, charX*16, charY*16)
-		}
+			drawHorde(tick, r)
 
+			// draw player
+			if attackTimer > 0 {
+				attackTimer--
+				drawSpriteAt(tick, r, characterHit, charX*16, charY*16)
+			} else {
+				drawSpriteAt(tick, r, character, charX*16, charY*16)
+			}
+
+		}
 		r.Present()
 
 		/*
