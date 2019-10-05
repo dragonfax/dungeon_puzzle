@@ -1,5 +1,10 @@
 package main
 
+import (
+	"github.com/SolarLune/resolv/resolv"
+	"github.com/veandco/go-sdl2/sdl"
+)
+
 func drawEntities(tick int, r *sdl.Renderer, entities []*PlacedEntity) {
 	for _, entity := range entities {
 		drawSpriteAt(tick, r, entity.Sprite, entity.Shape.X, entity.Shape.Y)
