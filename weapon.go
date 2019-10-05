@@ -49,7 +49,7 @@ func swingWeapon() {
 		defer cancelSwingWeapon()
 		for {
 			subscription.wait()
-			if subscription.cancelled {
+			if subscription.State == CANCELLED {
 				break
 			}
 			if weaponRotationDone() {
@@ -59,4 +59,16 @@ func swingWeapon() {
 		}
 		returnWeapon()
 	}()
+}
+
+func weaponRotationDone() bool {
+	panic("unimplemented")
+}
+
+func rotateWeapon() {
+	panic("unimplemented")
+}
+
+func returnWeapon() {
+	panic("unimplemented")
 }
