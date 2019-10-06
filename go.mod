@@ -1,10 +1,10 @@
-module .
+module game
 
-go 1.12
+go 1.13
 
 require (
 	cloud.google.com/go v0.46.3 // indirect
-	github.com/SolarLune/resolv v0.0.0-20190821203317-2f6176d8d107 // indirect
+	github.com/SolarLune/resolv v0.0.0-20190821203317-2f6176d8d107
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
 	github.com/coreos/bbolt v1.3.3 // indirect
 	github.com/coreos/etcd v3.3.15+incompatible // indirect
@@ -38,7 +38,7 @@ require (
 	github.com/mattn/goveralls v0.0.3 // indirect
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
 	github.com/onsi/ginkgo v1.10.2 // indirect
-	github.com/pelletier/go-toml v1.4.0 // indirect
+	github.com/pelletier/go-toml v1.5.0 // indirect
 	github.com/prometheus/client_golang v1.1.0 // indirect
 	github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4 // indirect
 	github.com/prometheus/common v0.7.0 // indirect
@@ -55,7 +55,7 @@ require (
 	github.com/ugorji/go v1.1.7 // indirect
 	github.com/ultraware/whitespace v0.0.4 // indirect
 	github.com/valyala/fasthttp v1.5.0 // indirect
-	github.com/veandco/go-sdl2 v0.3.3 // indirect
+	github.com/veandco/go-sdl2 v0.3.3
 	go.etcd.io/bbolt v1.3.3 // indirect
 	go.opencensus.io v0.22.1 // indirect
 	go.uber.org/multierr v1.2.0 // indirect
@@ -66,7 +66,7 @@ require (
 	golang.org/x/mobile v0.0.0-20191002175909-6d0d39b2ca82 // indirect
 	golang.org/x/net v0.0.0-20191003171128-d98b1b443823 // indirect
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
-	golang.org/x/sys v0.0.0-20191003212358-c178f38b412c // indirect
+	golang.org/x/sys v0.0.0-20191005200804-aed5e4c7ecf9 // indirect
 	golang.org/x/time v0.0.0-20190921001708-c4c64cad1fd0 // indirect
 	golang.org/x/tools v0.0.0-20191005014404-c9f9432ec4b2 // indirect
 	golang.org/x/tools/gopls v0.1.7 // indirect
@@ -74,7 +74,6 @@ require (
 	google.golang.org/appengine v1.6.4 // indirect
 	google.golang.org/genproto v0.0.0-20191002211648-c459b9ce5143 // indirect
 	google.golang.org/grpc v1.24.0 // indirect
-	gopkg.in/yaml.v2 v2.2.4 // indirect
 	mvdan.cc/unparam v0.0.0-20190917161559-b83a221c10a2 // indirect
 	sourcegraph.com/sqs/pbtypes v1.0.0 // indirect
 )
