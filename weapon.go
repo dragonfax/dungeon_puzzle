@@ -49,7 +49,7 @@ func swingWeapon() {
 		defer cancelSwingWeapon()
 		for {
 			subscription.wait()
-			if subscription.State == CANCELLED {
+			if subscription.Cancelled {
 				break
 			}
 			if weaponRotationDone() {

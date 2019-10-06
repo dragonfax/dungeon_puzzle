@@ -160,7 +160,6 @@ func main() {
 				}
 			case *sdl.QuitEvent:
 				running = false
-				break
 			}
 		}
 

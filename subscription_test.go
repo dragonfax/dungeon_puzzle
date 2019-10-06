@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 )
 
 type sequence []int
 
 func (s *sequence) add(i int) {
+	fmt.Printf("add %d\n", i)
 	*s = append(*s, i)
 }
 
@@ -94,7 +96,7 @@ func TestSubscriptionExternalCancel(t *testing.T) {
 		for {
 			subscription.wait()
 
-			if subscription.isCancelled() {
+			if subscription.Cancelled {
 				break
 			} else {
 				seq.add(2)

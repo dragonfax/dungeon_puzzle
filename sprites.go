@@ -92,10 +92,10 @@ func read_tiles() {
 			panic("didn't match " + line)
 		}
 		name := matches[1]
-		x, err := strconv.Atoi(matches[2])
-		y, err := strconv.Atoi(matches[3])
-		w, err := strconv.Atoi(matches[4])
-		h, err := strconv.Atoi(matches[5])
+		x, _ := strconv.Atoi(matches[2])
+		y, _ := strconv.Atoi(matches[3])
+		w, _ := strconv.Atoi(matches[4])
+		h, _ := strconv.Atoi(matches[5])
 		frames := 1
 		if matches[7] != "" {
 			frames, err = strconv.Atoi(matches[7])

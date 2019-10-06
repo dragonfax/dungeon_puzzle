@@ -1,62 +1,62 @@
 package main
 
-type SubState int
-
-const (
-	NEW SubState = iota
-	WAITING
-	RUNNING
-	CANCELLED
-)
+import "fmt"
 
 type Subscription struct {
-	State       SubState
-	Channel     chan bool
-	EventSource *EventSource
+	SubscriberChannel   chan bool
+	EventChannel        chan bool
+	EventSource         *EventSource
+	SubscriberListening bool
+	EventListening      bool
+	Cancelled           bool
 }
 
 func NewSubscription(e *EventSource) *Subscription {
-	return &Subscription{EventSource: e, Channel: make(chan bool), State: NEW}
+	return &Subscription{
+		EventSource:       e,
+		SubscriberChannel: make(chan bool),
+		EventChannel:      make(chan bool),
+	}
 }
 
 func (s *Subscription) cancel() {
-	if s.State == RUNNING {
-		// let the source know we're done.
-		s.State = CANCELLED
-		s.Channel <- false
-	} else {
-		s.State = CANCELLED
+	fmt.Println("any: cancelling subscription")
+	if s.Cancelled {
+		return
 	}
+	s.Cancelled = true
 	for i, sub := range s.EventSource.Subscriptions {
 		if sub == s {
 			s.EventSource.Subscriptions = append(s.EventSource.Subscriptions[:i], s.EventSource.Subscriptions[i+1:]...)
 			break
 		}
 	}
+	if s.SubscriberListening {
+		fmt.Println("any: notifying subscriber of cancellation")
+		s.SubscriberChannel <- true
+	}
+	if s.EventListening {
+		fmt.Println("any: notifying source of cancellation")
+		s.EventChannel <- true
+	}
 }
 
 func (s *Subscription) wait() {
-	if s.State == CANCELLED {
+	if s.Cancelled {
 		return
 	}
-	if s.State == RUNNING {
-		// let the source know we're done
-		s.Channel <- true
+	if s.EventListening {
+		fmt.Println("sub: notify source")
+		s.EventChannel <- true
+		fmt.Println("sub: source received notification")
 	}
 
 	// Wait for the event
-	s.State = WAITING
-	c := <-s.Channel
-	if !c {
-		s.State = CANCELLED
-	}
-	if s.State != CANCELLED {
-		s.State = RUNNING
-	}
-}
-
-func (s *Subscription) isCancelled() bool {
-	return s.State == CANCELLED
+	s.SubscriberListening = true
+	fmt.Println("sub: listening for source")
+	<-s.SubscriberChannel
+	fmt.Println("sub: source responded")
+	s.SubscriberListening = false
 }
 
 type EventSource struct {
@@ -75,9 +75,15 @@ func (e *EventSource) subscribe() *Subscription {
 
 func (e *EventSource) emit() {
 	for _, s := range e.Subscriptions {
-		if s.State != CANCELLED {
-			s.Channel <- true
-			<-s.Channel
+		if !s.Cancelled {
+			fmt.Println("source: notifying subscriber")
+			s.SubscriberChannel <- true
+			fmt.Println("source: subscriber received notification")
+			s.EventListening = true
+			fmt.Println("source: listening for response from subscriber")
+			<-s.EventChannel
+			fmt.Println("source: subscriber responded")
+			s.EventListening = false
 		}
 	}
 }
