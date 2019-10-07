@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/SolarLune/resolv/resolv"
@@ -16,9 +17,15 @@ func drawHorde(tick int, r *sdl.Renderer) {
 	sprite := spriteByName("goblin_idle_anim")
 	for y := 0; y < 2; y++ {
 		for x := 0; x < 4; x++ {
-			drawSpriteAt(tick, r, sprite, int32(x+4)*UNIT_SIZE, int32(y+2)*UNIT_SIZE)
+			drawSpriteAt(tick, r, sprite, int32(x+4)*UNIT_SIZE, int32(y+2)*UNIT_SIZE, 0)
 		}
 	}
+}
+
+const Pi = 3.14159
+
+func degrees2Radians(d float64) float64 {
+	return d * (Pi / 180)
 }
 
 func main() {
@@ -34,7 +41,9 @@ func main() {
 	characterHit := spriteByName("wizzart_m_hit_anim")
 	attackTimer := 0
 	characterShape := resolv.NewRectangle(4*UNIT_SIZE, 4*UNIT_SIZE, character.Frames[0].W, character.Frames[0].H)
-	var weilded *Sprite
+	var weilded *PlacedEntity
+	var weildedSwinging = false
+	var weildedSwingAngle = 0.0
 
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		panic(err)
@@ -90,11 +99,24 @@ func main() {
 				}
 				placedWeapons = removePlacedEntity(placedWeapons, weapon)
 				// give the weapon to the player.j
-				weilded = weapon.Sprite
+				weilded = weapon
 			}
 
 			if weilded != nil {
-				drawSpriteAt(tick, r, weilded, characterShape.X+UNIT_SIZE, characterShape.Y-UNIT_SIZE)
+				// TODO follow player
+
+				if weildedSwinging {
+					weildedSwingAngle += 30.0
+					if weildedSwingAngle > 300 {
+						weildedSwinging = false
+						weildedSwingAngle = 0.0
+					}
+				}
+
+				weildedX := int32(math.Cos(degrees2Radians(weildedSwingAngle)) * UNIT_SIZE)
+				weildedY := int32(math.Sin(degrees2Radians(weildedSwingAngle)) * UNIT_SIZE)
+
+				drawSpriteAt(tick, r, weilded.Sprite, weildedX+characterShape.X, weildedY+characterShape.Y, weildedSwingAngle)
 			}
 
 			drawEntities(tick, r, placedWeapons)
@@ -102,9 +124,9 @@ func main() {
 			// draw player
 			if attackTimer > 0 {
 				attackTimer--
-				drawSpriteAt(tick, r, characterHit, characterShape.X, characterShape.Y)
+				drawSpriteAt(tick, r, characterHit, characterShape.X, characterShape.Y, 0)
 			} else {
-				drawSpriteAt(tick, r, character, characterShape.X, characterShape.Y)
+				drawSpriteAt(tick, r, character, characterShape.X, characterShape.Y, 0)
 			}
 
 		}
@@ -151,7 +173,8 @@ func main() {
 						// attack
 						attackTimer = 3
 						if weilded != nil {
-							// swingWeapon()
+							weildedSwinging = true
+							weildedSwingAngle = 0.0
 						}
 					}
 

@@ -153,7 +153,7 @@ func read_pixels(r *sdl.Renderer) {
 	}
 }
 
-func drawSpriteAt(tick int, r *sdl.Renderer, sprite *Sprite, x, y int32) {
+func drawSpriteAt(tick int, r *sdl.Renderer, sprite *Sprite, x, y int32, angle float64) {
 	animIndex := tick % sprite.FrameCount
 	if sprite.FrameCount == 1 {
 		animIndex = 0
@@ -167,7 +167,7 @@ func drawSpriteAt(tick int, r *sdl.Renderer, sprite *Sprite, x, y int32) {
 		H: frame.H,
 	}
 
-	err := r.Copy(pixelTex, &frame, &tgtRect)
+	err := r.CopyEx(pixelTex, &frame, &tgtRect, angle, nil, 0)
 	if err != nil {
 		panic(err)
 	}
@@ -179,7 +179,7 @@ func showSpriteMap(tick int, r *sdl.Renderer) {
 	for i := 0; i < len(sprites); i++ {
 
 		sprite := &sprites[i]
-		drawSpriteAt(tick, r, sprite, x, y)
+		drawSpriteAt(tick, r, sprite, x, y, 0)
 
 		x = x + sprite.Frames[0].W
 

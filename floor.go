@@ -12,7 +12,7 @@ func showFloor(tick int, r *sdl.Renderer, floor [][]*Sprite) {
 		for x := 0; x < len(floor[y]); x++ {
 			sprite := floor[y][x]
 
-			drawSpriteAt(tick, r, sprite, int32(x)*UNIT_SIZE, int32(y)*UNIT_SIZE)
+			drawSpriteAt(tick, r, sprite, int32(x)*UNIT_SIZE, int32(y)*UNIT_SIZE, 0)
 		}
 	}
 }
