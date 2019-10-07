@@ -21,8 +21,6 @@ func drawHorde(tick int, r *sdl.Renderer) {
 	}
 }
 
-var entityMovementEvent EventSource = EventSource{}
-
 func main() {
 
 	spriteMap := flag.Bool("sprite-map", false, "show the sprites")
@@ -153,7 +151,7 @@ func main() {
 						// attack
 						attackTimer = 3
 						if weilded != nil {
-							swingWeapon()
+							// swingWeapon()
 						}
 					}
 
