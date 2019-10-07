@@ -91,27 +91,32 @@ func TestSubscriptionMultipleLoops(t *testing.T) {
 	seq.verify(t, 7)
 }
 
-/*
 func TestSubscriptionExternalCancel(t *testing.T) {
 
 	seq := make(sequence, 0)
 
 	event := NewEventSource()
 
-	seq.add(0)
-	subscription := event.subscribe()
+	subscribed := false
 
+	var subscription *Subscription
+
+	seq.add(0)
 	go func() {
 		for {
-			subscription.wait()
+			subscription = event.subscribe()
+			subscribed = true
 
-			if subscription.Cancelled {
+			if subscription.isCancelled() {
 				break
 			} else {
 				seq.add(2)
 			}
 		}
 	}()
+
+	for !subscribed {
+	}
 
 	seq.add(1)
 	event.emit()
@@ -122,7 +127,6 @@ func TestSubscriptionExternalCancel(t *testing.T) {
 
 	seq.verify(t, 4)
 }
-*/
 
 func TestSubscriptionMultipleListeners(t *testing.T) {
 
@@ -155,8 +159,41 @@ func TestSubscriptionMultipleListeners(t *testing.T) {
 
 	seq.add(1)
 	for subscribed < 2 {
-		event.emit()
 	}
+	event.emit()
+
+	seq.add(4)
+
+	seq.verify(t, 4)
+}
+
+func TestSubscriptionCancelBeforeStart(t *testing.T) {
+
+	seq := make(sequence, 0)
+
+	event := NewEventSource()
+
+	subscribed := false
+
+	seq.add(0)
+
+	go func() {
+		for {
+			subscription := event.subscribe()
+			subscribed = true
+
+			subscription.cancel()
+
+			seq.add(2)
+		}
+	}()
+
+	for !subscribed {
+	}
+
+	seq.add(1)
+	event.emit()
+	seq.add(3)
 
 	seq.add(4)
 

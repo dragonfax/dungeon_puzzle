@@ -8,6 +8,7 @@ type Subscription struct {
 	Channel     chan bool
 	EventSource *EventSource
 	Cancelled   bool
+	Started     bool
 }
 
 func NewSubscription(e *EventSource) *Subscription {
@@ -30,29 +31,37 @@ func (s *Subscription) cancel() {
 		}
 	}
 	s.Cancelled = true
-	// someones gotta be waiting, so let 'em know
-	s.Channel <- false
+	// release the waiting side
+	if s.Started {
+		s.Channel <- false
+	}
 }
 
-func (s *Subscription) firstWait() {
+func (s *Subscription) _firstWait() {
 	if s.Cancelled {
-		return
+		panic("cancelled")
 	}
 	// Wait for the event
 	fmt.Println("sub: first: listening for source")
+	s.Started = true
 	<-s.Channel
 	fmt.Printf("sub: first: source responded\n")
 }
 
-func (s *Subscription) wait() {
+func (s *Subscription) wait() bool {
 	if s.Cancelled {
-		return
+		return false
 	}
 	// Wait for the event
 	fmt.Println("sub: listening for source")
 	s.Channel <- true
 	<-s.Channel
 	fmt.Printf("sub: source responded\n")
+	return s.Cancelled
+}
+
+func (s *Subscription) isCancelled() bool {
+	return s.Cancelled
 }
 
 type EventSource struct {
@@ -66,13 +75,16 @@ func NewEventSource() *EventSource {
 func (e *EventSource) subscribe() *Subscription {
 	s := NewSubscription(e)
 	e.Subscriptions = append(e.Subscriptions, s)
-	s.firstWait()
+	s._firstWait()
 	return s
 }
 
 func (e *EventSource) emit() {
 	for _, s := range e.Subscriptions {
 		if !s.Cancelled {
+			if !s.Started {
+				continue
+			}
 			fmt.Println("source: listening for response from subscriber")
 			s.Channel <- true
 			<-s.Channel
