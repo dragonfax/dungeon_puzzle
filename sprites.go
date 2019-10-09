@@ -20,7 +20,7 @@ type Sprite struct {
 	Tags       []string
 }
 
-var sprites []Sprite
+var sprites []*Sprite
 
 func includesTag(tags []string, tag string) bool {
 	for _, t := range tags {
@@ -34,7 +34,7 @@ func includesTag(tags []string, tag string) bool {
 func spritesWithTag(tag string) []*Sprite {
 	tagged := make([]*Sprite, 0)
 	for i := range sprites {
-		sprite := &sprites[i]
+		sprite := sprites[i]
 		if includesTag(sprite.Tags, tag) {
 			tagged = append(tagged, sprite)
 		}
@@ -52,14 +52,14 @@ func spriteWithTag(tag string) *Sprite {
 func spriteByName(name string) *Sprite {
 	for _, sprite := range sprites {
 		if sprite.Name == name {
-			return &sprite
+			return sprite
 		}
 	}
 	panic("no sprite by name " + name)
 }
 
 func read_tiles() {
-	sprites = make([]Sprite, 0)
+	sprites = make([]*Sprite, 0)
 
 	parseLine := regexp.MustCompile(`^([0-9a-z_]+)\s+(\d+) (\d+) (\d+) (\d+)( (\d+))?$`)
 
@@ -104,7 +104,7 @@ func read_tiles() {
 
 		tags := strings.Split(name, "_")
 
-		sprite := Sprite{
+		sprite := &Sprite{
 			Name:       name,
 			FrameCount: frames,
 			Tags:       tags,
