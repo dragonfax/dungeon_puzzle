@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -53,7 +51,6 @@ func drawMonsterWillMove(r *sdl.Renderer) {
 				W: 16,
 				H: 16,
 			}
-			fmt.Printf("drawing arrow at %v\n", tgtRect)
 			err := r.CopyEx(moveArrowTexture, &arrowRect, &tgtRect, angle, nil, 0)
 			if err != nil {
 				panic(err)

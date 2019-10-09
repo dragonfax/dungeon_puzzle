@@ -116,6 +116,10 @@ func main() {
 						attackTimer = 3
 					}
 
+					if len(otherEntitiesAt(character, character.X, character.Y)) != 0 {
+						panic("suicide")
+					}
+
 				}
 			case *sdl.QuitEvent:
 				running = false
