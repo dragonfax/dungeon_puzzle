@@ -161,8 +161,8 @@ func drawSpriteAt(tick int, r *sdl.Renderer, sprite *Sprite, x, y int32, angle f
 	frame := sprite.Frames[animIndex]
 
 	tgtRect := sdl.Rect{
-		X: x,
-		Y: y,
+		X: x * PIXELS_PER_CELL,
+		Y: y * PIXELS_PER_CELL,
 		W: frame.W,
 		H: frame.H,
 	}
@@ -170,23 +170,5 @@ func drawSpriteAt(tick int, r *sdl.Renderer, sprite *Sprite, x, y int32, angle f
 	err := r.CopyEx(pixelTex, &frame, &tgtRect, angle, nil, 0)
 	if err != nil {
 		panic(err)
-	}
-}
-
-func showSpriteMap(tick int, r *sdl.Renderer) {
-	x := int32(0)
-	y := int32(0)
-	for i := 0; i < len(sprites); i++ {
-
-		sprite := &sprites[i]
-		drawSpriteAt(tick, r, sprite, x, y, 0)
-
-		x = x + sprite.Frames[0].W
-
-		if x > 200 {
-			x = 0
-			y = y + UNIT_SIZE
-		}
-
 	}
 }

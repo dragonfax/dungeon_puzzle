@@ -1,19 +1,19 @@
 package main
 
 import (
-	"github.com/SolarLune/resolv/resolv"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
 func drawEntities(tick int, r *sdl.Renderer, entities []*PlacedEntity) {
 	for _, entity := range entities {
-		drawSpriteAt(tick, r, entity.Sprite, entity.Shape.X, entity.Shape.Y, 0)
+		drawSpriteAt(tick, r, entity.Sprite, int32(entity.X), int32(entity.Y), 0)
 	}
 }
 
 type PlacedEntity struct {
-	Sprite *Sprite
-	Shape  *resolv.Rectangle
+	Sprite    *Sprite
+	HitSprite *Sprite
+	X, Y      int
 }
 
 func removePlacedEntity(input []*PlacedEntity, entity *PlacedEntity) []*PlacedEntity {

@@ -8,11 +8,11 @@ import (
 )
 
 func showFloor(tick int, r *sdl.Renderer, floor [][]*Sprite) {
-	for y := 0; y < len(floor); y++ {
-		for x := 0; x < len(floor[y]); x++ {
+	for y := 0; y < MAX_Y; y++ {
+		for x := 0; x < MAX_X; x++ {
 			sprite := floor[y][x]
 
-			drawSpriteAt(tick, r, sprite, int32(x)*UNIT_SIZE, int32(y)*UNIT_SIZE, 0)
+			drawSpriteAt(tick, r, sprite, int32(x), int32(y), 0)
 		}
 	}
 }
@@ -30,11 +30,11 @@ func chooseRandomFloorSprite() *Sprite {
 	return floorTiles[n]
 }
 
-func generateFloor() [][]*Sprite {
-	floor := make([][]*Sprite, 10)
-	for y := 0; y < 10; y++ {
-		floor[y] = make([]*Sprite, 10)
-		for x := 0; x < 10; x++ {
+func generateFloor(width int) [][]*Sprite {
+	floor := make([][]*Sprite, width)
+	for y := 0; y < width; y++ {
+		floor[y] = make([]*Sprite, width)
+		for x := 0; x < width; x++ {
 			floor[y][x] = chooseRandomFloorSprite()
 		}
 	}
