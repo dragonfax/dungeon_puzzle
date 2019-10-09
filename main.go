@@ -15,6 +15,15 @@ const TICKS_PER_SPAWN = 30
 var character *PlacedEntity
 var moveArrowTexture *sdl.Texture
 
+type Direction int
+
+const (
+	LEFT Direction = iota
+	RIGHT
+	UP
+	DOWN
+)
+
 func main() {
 
 	read_tiles()
@@ -91,22 +100,22 @@ func main() {
 			case *sdl.KeyboardEvent:
 				if e.Type == sdl.KEYDOWN {
 					switch e.Keysym.Sym {
-					case sdl.K_LEFT, sdl.K_a:
+					case sdl.K_a:
 						character.X = character.X - 1
 						if character.X < 0 {
 							character.X = 0
 						}
-					case sdl.K_RIGHT, sdl.K_d:
+					case sdl.K_d:
 						character.X = character.X + 1
 						if character.X > MAX_X {
 							character.X = MAX_X
 						}
-					case sdl.K_UP, sdl.K_w:
+					case sdl.K_w:
 						character.Y = character.Y - 1
 						if character.Y < 0 {
 							character.Y = 0
 						}
-					case sdl.K_DOWN, sdl.K_s:
+					case sdl.K_s:
 						character.Y = character.Y + 1
 						if character.Y > MAX_Y {
 							character.Y = MAX_Y
@@ -114,6 +123,14 @@ func main() {
 					case sdl.K_SPACE:
 						// attack
 						attackTimer = 3
+					case sdl.K_LEFT:
+						swipe(LEFT)
+					case sdl.K_RIGHT:
+						swipe(RIGHT)
+					case sdl.K_UP:
+						swipe(UP)
+					case sdl.K_DOWN:
+						swipe(DOWN)
 					}
 
 					if len(otherEntitiesAt(character, character.X, character.Y)) != 0 {
