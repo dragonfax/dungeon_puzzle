@@ -148,6 +148,13 @@ func read_pixels(r *sdl.Renderer) {
 	if err != nil {
 		panic(err)
 	}
+
+	tex, err := img.LoadTexture(r, "sprites/move_arrow.png")
+	if err != nil {
+		panic(err)
+	}
+	moveArrowTexture = tex
+
 }
 
 func drawSpriteAt(tick int, r *sdl.Renderer, sprite *Sprite, x, y int32, angle float64) {

@@ -13,6 +13,7 @@ const MAX_Y = MAX_X
 const TICKS_PER_SPAWN = 30
 
 var character *PlacedEntity
+var moveArrowTexture *sdl.Texture
 
 func main() {
 
@@ -60,12 +61,18 @@ func main() {
 	tick := 0
 	for running {
 
-		if tick%TICKS_PER_SPAWN == 0 {
+		monsterThinkTick := tick % TICKS_PER_SPAWN
+		if monsterThinkTick == 0 {
+			monstersMove()
 			spawnMonster()
+		}
+		if monsterThinkTick == TICKS_PER_SPAWN/2 {
+			monstersThink()
 		}
 
 		r.Clear()
 		showFloor(tick, r, floor)
+		drawMonsterWillMove(r)
 
 		drawEntities(tick, r, monsters)
 

@@ -14,6 +14,7 @@ type PlacedEntity struct {
 	Sprite    *Sprite
 	HitSprite *Sprite
 	X, Y      int
+	Data      interface{}
 }
 
 func removePlacedEntity(input []*PlacedEntity, entity *PlacedEntity) []*PlacedEntity {
