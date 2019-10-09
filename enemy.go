@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 var ENEMY_ORDER []string = []string{
 	"imp",
 	"goblin",
@@ -20,9 +22,10 @@ var monsters []*PlacedEntity
 
 func findEmptyPosition() (x, y int) {
 	for x := 0; x < MAX_X; x++ {
-		for y := 0; x < MAX_Y; y++ {
+		for y := 0; y < MAX_Y; y++ {
 			occupied := entitiesAt(x, y)
 			if len(occupied) == 0 {
+				fmt.Printf("found empty cell at %d,%d\n", x, y)
 				return x, y
 			}
 		}
@@ -30,10 +33,10 @@ func findEmptyPosition() (x, y int) {
 	panic("board full")
 }
 
-func spawnMonster(monsters []*PlacedEntity) {
+func spawnMonster() {
 	x, y := findEmptyPosition()
 	newMonster := &PlacedEntity{
-		Sprite: spriteByName("ogre_idle_anim"),
+		Sprite: spriteByName("skelet_idle_anim"),
 		X:      x,
 		Y:      y,
 	}

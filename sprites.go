@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"os"
 	"regexp"
@@ -37,7 +36,6 @@ func spritesWithTag(tag string) []*Sprite {
 	for i := range sprites {
 		sprite := &sprites[i]
 		if includesTag(sprite.Tags, tag) {
-			fmt.Printf("tags %v includes tag %s\n", sprite.Tags, tag)
 			tagged = append(tagged, sprite)
 		}
 	}
@@ -105,7 +103,6 @@ func read_tiles() {
 		}
 
 		tags := strings.Split(name, "_")
-		// fmt.Printf("sprite has tags %v\n", tags)
 
 		sprite := Sprite{
 			Name:       name,
@@ -162,7 +159,7 @@ func drawSpriteAt(tick int, r *sdl.Renderer, sprite *Sprite, x, y int32, angle f
 
 	tgtRect := sdl.Rect{
 		X: x * PIXELS_PER_CELL,
-		Y: y * PIXELS_PER_CELL,
+		Y: y*PIXELS_PER_CELL + PIXELS_PER_CELL - sprite.Frames[0].H,
 		W: frame.W,
 		H: frame.H,
 	}

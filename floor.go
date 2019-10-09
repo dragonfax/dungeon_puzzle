@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 
 	"github.com/veandco/go-sdl2/sdl"
@@ -22,11 +21,8 @@ var floorTiles []*Sprite
 func chooseRandomFloorSprite() *Sprite {
 	if floorTiles == nil {
 		floorTiles = spritesWithTag("floor")
-		fmt.Printf("found %d floor tiles\n", len(floorTiles))
-		fmt.Printf("%v\n%v\n", floorTiles[0], floorTiles[1])
 	}
 	n := rand.Intn(len(floorTiles))
-	// fmt.Printf("choosing floor tile %d %s\n", n, floorTiles[n].Name)
 	return floorTiles[n]
 }
 

@@ -10,6 +10,7 @@ const PIXELS_PER_CELL = 16
 const CELLS_PER_BOARD = 6
 const MAX_X = CELLS_PER_BOARD - 1
 const MAX_Y = MAX_X
+const TICKS_PER_SPAWN = 30
 
 var character *PlacedEntity
 
@@ -17,8 +18,8 @@ func main() {
 
 	read_tiles()
 
-	characterSprite := spriteByName("wizzard_m_idle_anim")
-	characterHitSprite := spriteByName("wizzart_m_hit_anim")
+	characterSprite := spriteByName("necromancer_idle_anim")
+	characterHitSprite := spriteByName("necromancer_run_anim")
 	character = &PlacedEntity{
 		Sprite:    characterSprite,
 		HitSprite: characterHitSprite,
@@ -59,8 +60,8 @@ func main() {
 	tick := 0
 	for running {
 
-		if tick%15 == 0 {
-			spawnMonster(monsters)
+		if tick%TICKS_PER_SPAWN == 0 {
+			spawnMonster()
 		}
 
 		r.Clear()
