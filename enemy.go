@@ -147,6 +147,14 @@ func spawnMonster() {
 	monsters = append(monsters, newMonster)
 }
 
+func removeMonster(monster *PlacedEntity) {
+	for i, item := range monsters {
+		if item == monster {
+			monsters = append(monsters[:i], monsters[i+1:]...)
+		}
+	}
+}
+
 func upgrade(monster *PlacedEntity) bool {
 	for i, upgradeSprite := range ENEMY_ORDER_SPRITES {
 		if upgradeSprite == monster.Sprite && i+1 < len(ENEMY_ORDER_SPRITES) {

@@ -10,15 +10,8 @@ const (
 )
 
 func swipe(d Direction) {
-	if d == LEFT {
-		for y := 0; y <= MAX_Y; y++ {
-			swipeMonsters(LEFT, y)
-		}
-	}
-	if d == RIGHT {
-		for y := 0; y <= MAX_Y; y++ {
-			swipeMonsters(RIGHT, y)
-		}
+	for z := 0; z <= MAX_X; z++ {
+		swipeMonsters(d, z)
 	}
 }
 
@@ -31,7 +24,36 @@ func reverseEntityList(list []*PlacedEntity) []*PlacedEntity {
 	return result
 }
 
-func swipeMonsters(d Direction, y int) {
+func isHorizontal(d Direction) bool {
+	return d == LEFT || d == RIGHT
+}
+
+func isIncreasing(d Direction) bool {
+	return d == RIGHT || d == DOWN
+}
+
+func extractAxis(d Direction, z int) []*PlacedEntity {
+	monstersInRow := make([]*PlacedEntity, 0)
+	for w := 0; w <= MAX_X; w++ {
+		var x, y int
+		if isHorizontal(d) {
+			x = w
+			y = z
+		} else {
+			x = z
+			y = w
+		}
+		monstersInCell := otherEntitiesAt(character, x, y)
+		if len(monstersInCell) != 0 {
+			// there should never be more than one
+			monstersInRow = append(monstersInRow, monstersInCell[0])
+		}
+	}
+	// now we have the short list of monsters.
+	return monstersInRow
+}
+
+func swipeMonsters(d Direction, z int) {
 	/*
 		for each monster in the row
 		left to right.
@@ -46,17 +68,10 @@ func swipeMonsters(d Direction, y int) {
 
 	*/
 
-	monstersInRow := make([]*PlacedEntity, 0)
-	for x := 0; x <= MAX_X; x++ {
-		monstersInCell := otherEntitiesAt(character, x, y)
-		if len(monstersInCell) != 0 {
-			monstersInRow = append(monstersInRow, monstersInCell[0])
-		}
-	}
-	// now we have the short list of monsters.
+	monstersInRow := extractAxis(d, z)
 
 	// if right, reverse list
-	if d == RIGHT {
+	if isIncreasing(d) {
 		monstersInRow = reverseEntityList(monstersInRow)
 	}
 
@@ -71,21 +86,31 @@ func swipeMonsters(d Direction, y int) {
 				if upgrade(monster) {
 					// remove second monster
 					monstersInRow = append(monstersInRow[:i+1], monstersInRow[i+2:]...)
+					// TODO actually remove from monsters global
+					removeMonster(otherMonster)
 				}
 			}
 		}
 	}
 
-	if d == RIGHT {
+	if isIncreasing(d) {
 		monstersInRow = reverseEntityList(monstersInRow)
 	}
 
 	// redistribute the x values
+	createAxis(d, z, monstersInRow)
+}
+
+func createAxis(d Direction, z int, monstersInRow []*PlacedEntity) {
 	prefix := 0
-	if d == RIGHT {
+	if isIncreasing(d) {
 		prefix = CELLS_PER_BOARD - len(monstersInRow)
 	}
 	for i, monster := range monstersInRow {
-		monster.X = prefix + i
+		if isHorizontal(d) {
+			monster.X = prefix + i
+		} else {
+			monster.Y = prefix + i
+		}
 	}
 }
