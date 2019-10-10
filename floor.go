@@ -7,8 +7,8 @@ import (
 )
 
 func showFloor(tick int, r *sdl.Renderer, floor [][]*Sprite) {
-	for y := 0; y < MAX_Y; y++ {
-		for x := 0; x < MAX_X; x++ {
+	for y := 0; y <= MAX_Y; y++ {
+		for x := 0; x <= MAX_X; x++ {
 			sprite := floor[y][x]
 
 			drawSpriteAt(tick, r, sprite, int32(x), int32(y), 0)
