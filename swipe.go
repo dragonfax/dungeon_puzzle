@@ -1,14 +1,37 @@
 package main
 
+type Direction int
+
+const (
+	LEFT Direction = iota
+	RIGHT
+	UP
+	DOWN
+)
+
 func swipe(d Direction) {
 	if d == LEFT {
 		for y := 0; y <= MAX_Y; y++ {
-			swipeMonstersLeft(y)
+			swipeMonsters(LEFT, y)
+		}
+	}
+	if d == RIGHT {
+		for y := 0; y <= MAX_Y; y++ {
+			swipeMonsters(RIGHT, y)
 		}
 	}
 }
 
-func swipeMonstersLeft(y int) {
+func reverseEntityList(list []*PlacedEntity) []*PlacedEntity {
+	length := len(list)
+	result := make([]*PlacedEntity, length, length)
+	for i, entity := range list {
+		result[length-1-i] = entity
+	}
+	return result
+}
+
+func swipeMonsters(d Direction, y int) {
 	/*
 		for each monster in the row
 		left to right.
@@ -32,6 +55,11 @@ func swipeMonstersLeft(y int) {
 	}
 	// now we have the short list of monsters.
 
+	// if right, reverse list
+	if d == RIGHT {
+		monstersInRow = reverseEntityList(monstersInRow)
+	}
+
 	for i := 0; i < len(monstersInRow); i++ {
 		monster := monstersInRow[i]
 		// is there another monster?
@@ -48,8 +76,16 @@ func swipeMonstersLeft(y int) {
 		}
 	}
 
+	if d == RIGHT {
+		monstersInRow = reverseEntityList(monstersInRow)
+	}
+
 	// redistribute the x values
+	prefix := 0
+	if d == RIGHT {
+		prefix = CELLS_PER_BOARD - len(monstersInRow)
+	}
 	for i, monster := range monstersInRow {
-		monster.X = i
+		monster.X = prefix + i
 	}
 }

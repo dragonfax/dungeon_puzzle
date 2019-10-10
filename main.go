@@ -15,15 +15,6 @@ const TICKS_PER_SPAWN = 30
 var character *PlacedEntity
 var moveArrowTexture *sdl.Texture
 
-type Direction int
-
-const (
-	LEFT Direction = iota
-	RIGHT
-	UP
-	DOWN
-)
-
 func main() {
 
 	read_tiles()
