@@ -40,9 +40,10 @@ func swipeMonstersLeft(y int) {
 			// are they the same type
 			if otherMonster.Sprite == monster.Sprite {
 				// merge them
-				upgrade(monster)
-				// remove second monster
-				monstersInRow = append(monstersInRow[:i+1], monstersInRow[i+2:]...)
+				if upgrade(monster) {
+					// remove second monster
+					monstersInRow = append(monstersInRow[:i+1], monstersInRow[i+2:]...)
+				}
 			}
 		}
 	}
