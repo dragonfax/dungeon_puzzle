@@ -58,6 +58,7 @@ func main() {
 
 	read_pixels(r)
 	read_reticle(r)
+	loadEnemyOrderSprites()
 
 	cursor := sdl.CreateColorCursor(reticleSur, 4, 4)
 	sdl.SetCursor(cursor)

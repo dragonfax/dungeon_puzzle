@@ -52,9 +52,3 @@ func swipeMonstersLeft(y int) {
 		monster.X = i
 	}
 }
-
-func upgrade(monster *PlacedEntity) {
-	if monster.Sprite == spriteByName("skelet_idle_anim") {
-		monster.Sprite = spriteByName("zombie_idle_anim")
-	}
-}

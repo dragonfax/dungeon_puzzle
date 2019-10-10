@@ -5,19 +5,28 @@ import (
 )
 
 var ENEMY_ORDER []string = []string{
-	"imp",
-	"goblin",
-	"masked_orc",
-	"skelet",
-	"muddy",
-	"zombie",
-	"ice_zombie",
-	"orc_warrior",
-	"orc_shaman",
-	"wogol",
-	"big_zombie",
-	"ogre",
-	"big_damon",
+	"imp_idle_anim",
+	"goblin_idle_anim",
+	"masked_orc_idle_anim",
+	"skelet_idle_anim",
+	"muddy_idle_anim",
+	"zombie_idle_anim",
+	"ice_zombie_idle_anim",
+	"orc_warrior_idle_anim",
+	"orc_shaman_idle_anim",
+	"wogol_idle_anim",
+	"big_zombie_idle_anim",
+	"ogre_idle_anim",
+	"big_demon_idle_anim",
+}
+var ENEMY_ORDER_SPRITES []*Sprite
+
+func loadEnemyOrderSprites() {
+	ENEMY_ORDER_SPRITES = make([]*Sprite, len(ENEMY_ORDER), len(ENEMY_ORDER))
+	for i, name := range ENEMY_ORDER {
+		sprite := spriteByName(name)
+		ENEMY_ORDER_SPRITES[i] = sprite
+	}
 }
 
 var monsters []*PlacedEntity
@@ -136,4 +145,14 @@ func spawnMonster() {
 		Y:      y,
 	}
 	monsters = append(monsters, newMonster)
+}
+
+func upgrade(monster *PlacedEntity) bool {
+	for i, upgradeSprite := range ENEMY_ORDER_SPRITES {
+		if upgradeSprite == monster.Sprite && i+1 < len(ENEMY_ORDER_SPRITES) {
+			monster.Sprite = ENEMY_ORDER_SPRITES[i+1]
+			return true
+		}
+	}
+	return false
 }
