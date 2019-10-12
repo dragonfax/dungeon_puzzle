@@ -1,6 +1,8 @@
 package main
 
 import (
+	"math/rand"
+
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -125,20 +127,34 @@ func monstersMove() {
 	}
 }
 
-func findEmptyPosition() (x, y int) {
+type Position struct {
+	X, Y int
+}
+
+func getEmptyPositions() []Position {
+	positions := make([]Position, 0)
 	for x := 0; x < MAX_X; x++ {
 		for y := 0; y < MAX_Y; y++ {
 			occupied := entitiesAt(x, y)
 			if len(occupied) == 0 {
-				return x, y
+				positions = append(positions, Position{x, y})
 			}
 		}
 	}
-	panic("board full")
+	return positions
+}
+
+func getNewMonsterPosition() (x, y int) {
+	allPositions := getEmptyPositions()
+	if len(allPositions) == 0 {
+		panic("suicide")
+	}
+	i := rand.Intn(len(allPositions))
+	return allPositions[i].X, allPositions[i].Y
 }
 
 func spawnMonster() {
-	x, y := findEmptyPosition()
+	x, y := getNewMonsterPosition()
 	newMonster := &PlacedEntity{
 		Sprite: ENEMY_ORDER_SPRITES[0],
 		X:      x,
