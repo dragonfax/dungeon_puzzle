@@ -140,7 +140,7 @@ func findEmptyPosition() (x, y int) {
 func spawnMonster() {
 	x, y := findEmptyPosition()
 	newMonster := &PlacedEntity{
-		Sprite: spriteByName("skelet_idle_anim"),
+		Sprite: ENEMY_ORDER_SPRITES[0],
 		X:      x,
 		Y:      y,
 	}
@@ -159,6 +159,16 @@ func upgrade(monster *PlacedEntity) bool {
 	for i, upgradeSprite := range ENEMY_ORDER_SPRITES {
 		if upgradeSprite == monster.Sprite && i+1 < len(ENEMY_ORDER_SPRITES) {
 			monster.Sprite = ENEMY_ORDER_SPRITES[i+1]
+			return true
+		}
+	}
+	return false
+}
+
+func downgrade(monster *PlacedEntity) bool {
+	for i, upgradeSprite := range ENEMY_ORDER_SPRITES {
+		if upgradeSprite == monster.Sprite && i-1 >= 0 {
+			monster.Sprite = ENEMY_ORDER_SPRITES[i-1]
 			return true
 		}
 	}

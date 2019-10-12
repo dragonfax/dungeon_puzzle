@@ -88,29 +88,31 @@ func main() {
 		r.Present()
 
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+			moveToX := character.X
+			moveToY := character.Y
 			switch e := event.(type) {
 			case *sdl.KeyboardEvent:
 				if e.Type == sdl.KEYDOWN {
 					switch e.Keysym.Sym {
 					case sdl.K_a:
-						character.X = character.X - 1
-						if character.X < 0 {
-							character.X = 0
+						moveToX = character.X - 1
+						if moveToX < 0 {
+							moveToX = 0
 						}
 					case sdl.K_d:
-						character.X = character.X + 1
-						if character.X > MAX_X {
-							character.X = MAX_X
+						moveToX = character.X + 1
+						if moveToX > MAX_X {
+							moveToX = MAX_X
 						}
 					case sdl.K_w:
-						character.Y = character.Y - 1
-						if character.Y < 0 {
-							character.Y = 0
+						moveToY = character.Y - 1
+						if moveToY < 0 {
+							moveToY = 0
 						}
 					case sdl.K_s:
-						character.Y = character.Y + 1
-						if character.Y > MAX_Y {
-							character.Y = MAX_Y
+						moveToY = character.Y + 1
+						if moveToY > MAX_Y {
+							moveToY = MAX_Y
 						}
 					case sdl.K_SPACE:
 						// attack
@@ -123,6 +125,20 @@ func main() {
 						swipe(UP)
 					case sdl.K_DOWN:
 						swipe(DOWN)
+					}
+
+					if moveToX != character.X || moveToY != character.Y {
+						monstersAt := otherEntitiesAt(character, moveToX, moveToY)
+						if len(monstersAt) == 0 {
+							character.X = moveToX
+							character.Y = moveToY
+						} else {
+							// attack monster
+							monster := monstersAt[0]
+							if !downgrade(monster) {
+								removeMonster(monster)
+							}
+						}
 					}
 
 					if len(otherEntitiesAt(character, character.X, character.Y)) != 0 {
