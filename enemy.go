@@ -149,6 +149,26 @@ func getNewMonsterPosition() (x, y int) {
 	if len(allPositions) == 0 {
 		panic("suicide")
 	}
+
+	bestPositions := make([]Position, 0)
+	for _, pos := range allPositions {
+		if (pos.X == character.X+1 || pos.X == character.X-1) && pos.Y == character.Y {
+			// skip this position
+			continue
+		}
+		if (pos.Y == character.Y+1 || pos.Y == character.Y-1) && pos.X == character.X {
+			// skip this position
+			continue
+		}
+		bestPositions = append(bestPositions, pos)
+	}
+
+	// take best position first
+	if len(bestPositions) > 0 {
+		i := rand.Intn(len(bestPositions))
+		return bestPositions[i].X, allPositions[i].Y
+	}
+
 	i := rand.Intn(len(allPositions))
 	return allPositions[i].X, allPositions[i].Y
 }
